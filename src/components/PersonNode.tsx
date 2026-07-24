@@ -1,5 +1,4 @@
 import React from 'react';
-import { Handle, Position } from 'reactflow';
 
 function PersonNode({ data }: { data: any }) {
   const role = data.role || 'Rodzina';
@@ -15,7 +14,6 @@ function PersonNode({ data }: { data: any }) {
       opacity: data.deceased ? 0.7 : 1,
       filter: data.deceased ? 'grayscale(100%)' : 'none',
     }}>
-      <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
       
       {/* Avatar Circle */}
       <div style={{
@@ -23,8 +21,8 @@ function PersonNode({ data }: { data: any }) {
         height: '80px',
         borderRadius: '50%',
         backgroundColor: '#e2e8f0',
-        border: '3px solid white',
-        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+        border: data.isRoot ? '3px solid #2563eb' : '3px solid white',
+        boxShadow: data.isRoot ? '0 0 0 3px rgba(37, 99, 235, 0.3)' : '0 4px 6px -1px rgb(0 0 0 / 0.1)',
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
@@ -58,10 +56,6 @@ function PersonNode({ data }: { data: any }) {
       }}>
         {role}
       </div>
-
-      <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
-      <Handle type="source" position={Position.Right} id="right" style={{ opacity: 0, top: '40px' }} />
-      <Handle type="target" position={Position.Left} id="left" style={{ opacity: 0, top: '40px' }} />
     </div>
   );
 }
