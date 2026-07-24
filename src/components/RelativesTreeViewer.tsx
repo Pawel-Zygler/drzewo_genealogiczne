@@ -144,18 +144,39 @@ export default function RelativesTreeViewer() {
             <div key={cIdx} style={{ position: 'absolute', left: `${offsetX}px`, top: `${offsetY}px` }}>
               {/* SVG Connectors */}
               <svg style={{ position: 'absolute', top: 0, left: 0, width: '2000px', height: '2000px', pointerEvents: 'none', zIndex: 1 }}>
-                {res.connectors.map(([x1, y1, x2, y2]: any, idx: number) => (
-                  <line
-                    key={idx}
-                    x1={x1 * NODE_WIDTH + NODE_WIDTH / 2}
-                    y1={y1 * NODE_HEIGHT + 40}
-                    x2={x2 * NODE_WIDTH + NODE_WIDTH / 2}
-                    y2={y2 * NODE_HEIGHT + 40}
-                    stroke="#64748b"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                ))}
+                {res.connectors.map(([x1, y1, x2, y2]: any, idx: number) => {
+                  const sx = x1 * NODE_WIDTH + NODE_WIDTH / 2;
+                  const sy = y1 * NODE_HEIGHT + 40;
+                  const ex = x2 * NODE_WIDTH + NODE_WIDTH / 2;
+                  const ey = y2 * NODE_HEIGHT + 40;
+
+                  if (sx === ex || sy === ey) {
+                    return (
+                      <line
+                        key={idx}
+                        x1={sx}
+                        y1={sy}
+                        x2={ex}
+                        y2={ey}
+                        stroke="#64748b"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    );
+                  }
+
+                  return (
+                    <path
+                      key={idx}
+                      d={`M ${sx} ${sy} H ${ex} V ${ey}`}
+                      stroke="#64748b"
+                      strokeWidth="2"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  );
+                })}
               </svg>
 
               {/* Nodes */}
