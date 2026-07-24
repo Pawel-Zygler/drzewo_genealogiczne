@@ -21,10 +21,15 @@ export const initialNodes: Node[] = [
   { id: 'dzieci_jerzego', data: { label: '3 dzieci Jerzego', branch: 'siudzinski' }, position: { x: 0, y: 0 } },
   
   { id: 'zofia_s', data: { label: 'Zofia Siudzińska (Babcia Zosia)', branch: 'siudzinski' }, position: { x: 0, y: 0 } },
-  { id: 'hania', data: { label: 'Hanna (Hania)', branch: 'siudzinski' }, position: { x: 0, y: 0 } },
+  { id: 'hania', data: { label: 'Hanna (Hania) †', branch: 'siudzinski', deceased: true }, position: { x: 0, y: 0 } },
+  { id: 'jacek', data: { label: 'Jacek', branch: 'other' }, position: { x: 0, y: 0 } },
   { id: 'gosia', data: { label: 'Małgorzata (Gosia)', branch: 'main' }, position: { x: 0, y: 0 } },
   { id: 'pawel', data: { label: 'Paweł (Ty)', branch: 'main' }, position: { x: 0, y: 0 } },
   { id: 'tosia', data: { label: 'Antonina (Tosia)', branch: 'main' }, position: { x: 0, y: 0 } },
+  { id: 'marcin', data: { label: 'Marcin', branch: 'siudzinski' }, position: { x: 0, y: 0 } },
+  { id: 'marzena_m', data: { label: 'Marzena', branch: 'other' }, position: { x: 0, y: 0 } },
+  { id: 'ciri', data: { label: 'Ciri', branch: 'siudzinski' }, position: { x: 0, y: 0 } },
+  { id: 'kayla', data: { label: 'Kayla', branch: 'siudzinski' }, position: { x: 0, y: 0 } },
   
   { id: 'barbara_s', data: { label: 'Barbara z d. Siudzińska (Ciocia Basia)', branch: 'siudzinski' }, position: { x: 0, y: 0 } },
   { id: 'kazimierz_u', data: { label: 'Kazimierz Utrata', branch: 'other' }, position: { x: 0, y: 0 } },
@@ -77,7 +82,13 @@ export const initialEdges: Edge[] = [
   { id: 'e_jes_dj', source: 'jerzy_s', target: 'dzieci_jerzego', type: 'step' },
   
   { id: 'e_zs_h', source: 'zofia_s', target: 'hania', type: 'step' },
+  { id: 'e_h_j', source: 'hania', target: 'jacek', type: 'step' },
   { id: 'e_h_g', source: 'hania', target: 'gosia', type: 'step' },
+  { id: 'e_h_m', source: 'hania', target: 'marcin', type: 'step' },
+  { id: 'e_m_mm', source: 'marcin', target: 'marzena_m', type: 'step' },
+  { id: 'e_m_c', source: 'marcin', target: 'ciri', type: 'step' },
+  { id: 'e_m_k', source: 'marcin', target: 'kayla', type: 'step' },
+  
   { id: 'e_g_p', source: 'gosia', target: 'pawel', type: 'step' },
   { id: 'e_g_t', source: 'gosia', target: 'tosia', type: 'step' },
   { id: 'e_p_t', source: 'pawel', target: 'tosia', type: 'step' },

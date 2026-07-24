@@ -12,6 +12,8 @@ function PersonNode({ data }: { data: any }) {
       fontFamily: 'Outfit, sans-serif',
       width: '120px',
       background: 'transparent',
+      opacity: data.deceased ? 0.7 : 1,
+      filter: data.deceased ? 'grayscale(100%)' : 'none',
     }}>
       <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
       
