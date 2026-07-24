@@ -2,7 +2,7 @@ import { Node, Edge } from 'reactflow';
 
 export interface FamilyNodeData {
   label: string;
-  branch: 'dominik' | 'siudzinski' | 'franciszek' | 'leon' | 'main' | 'other';
+  branch: 'dominik' | 'siudzinski' | 'franciszek' | 'leon' | 'main' | 'zygler' | 'other';
   gen: number; // 1 to 6
   role?: string;
   deceased?: boolean;
@@ -49,7 +49,6 @@ export const initialNodes: (Node & { data: FamilyNodeData })[] = [
   { id: 'wiesia_f', data: { label: 'Wiesława (Wiesia)', branch: 'franciszek', gen: 4, role: 'Córka III żony' }, position: { x: 0, y: 0 } },
   { id: 'tomek', data: { label: 'Tomek', branch: 'other', gen: 4, role: 'ur. 1958' }, position: { x: 0, y: 0 } },
   { id: 'jasiek', data: { label: 'Jan (Jasiek)', branch: 'leon', gen: 4, role: 'Syn Leona' }, position: { x: 0, y: 0 } },
-  { id: 'rodzic_pawla', data: { label: 'Rodzic Pawła', branch: 'franciszek', gen: 4, role: 'Linia Dziadka Franka' }, position: { x: 0, y: 0 } },
   { id: 'hania', data: { label: 'Hanna (Hania) †', branch: 'siudzinski', gen: 4, role: 'Teściowa', deceased: true }, position: { x: 0, y: 0 } },
   { id: 'jacek', data: { label: 'Jacek', branch: 'other', gen: 4, role: 'Teść' }, position: { x: 0, y: 0 } },
   { id: 'dzieci_jerzego', data: { label: '3 dzieci Jerzego', branch: 'siudzinski', gen: 4 }, position: { x: 0, y: 0 } },
@@ -57,7 +56,7 @@ export const initialNodes: (Node & { data: FamilyNodeData })[] = [
   { id: 'pawel_u', data: { label: 'Paweł Utrata', branch: 'siudzinski', gen: 4 }, position: { x: 0, y: 0 } },
 
   // --- GENERACJA 5: Nasze pokolenie ---
-  { id: 'pawel', data: { label: 'Paweł (Ty)', branch: 'main', gen: 5, role: 'Mąż Gosi' }, position: { x: 0, y: 0 } },
+  { id: 'pawel', data: { label: 'Paweł (Ty)', branch: 'zygler', gen: 5, role: 'Linia Zyglerów' }, position: { x: 0, y: 0 } },
   { id: 'gosia', data: { label: 'Małgorzata (Gosia)', branch: 'main', gen: 5, role: 'Żona Pawła' }, position: { x: 0, y: 0 } },
   { id: 'marcin', data: { label: 'Marcin', branch: 'siudzinski', gen: 5, role: 'Brat Gosi' }, position: { x: 0, y: 0 } },
   { id: 'marzena_m', data: { label: 'Marzena', branch: 'other', gen: 5, role: 'Żona Marcina' }, position: { x: 0, y: 0 } },
@@ -136,8 +135,5 @@ export const initialEdges: Edge[] = [
   { id: 'e_c1_r', source: 'corka_j_1', target: 'rafal', type: 'step' },
   { id: 'e_c2_m', source: 'corka_j_2', target: 'marzena_leon', type: 'step' },
   { id: 'e_a_t', source: 'andrzej_j', target: 'teresa', type: 'step' },
-  
-  // Paweł parents connect
-  { id: 'e_f_rp', source: 'franciszek', target: 'rodzic_pawla', type: 'step' },
-  { id: 'e_rp_p', source: 'rodzic_pawla', target: 'pawel', type: 'step' },
+
 ];

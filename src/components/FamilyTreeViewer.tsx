@@ -35,7 +35,7 @@ function calculateGenerationLayout(nodes: any[], filterBranch: string) {
     genMap[gen].push(node);
   });
 
-  const branchOrder: Record<string, number> = { dominik: 1, siudzinski: 2, main: 3, franciszek: 4, leon: 5, other: 6 };
+  const branchOrder: Record<string, number> = { dominik: 1, siudzinski: 2, main: 3, zygler: 3, franciszek: 4, leon: 5, other: 6 };
   
   const layoutedNodes: any[] = [];
 
@@ -118,18 +118,18 @@ export default function FamilyTreeViewer() {
             onClick={() => setFilterBranch('pawla')}
             style={{ padding: '6px 12px', borderRadius: '6px', border: filterBranch === 'pawla' ? '2px solid #ea580c' : '1px solid #cbd5e1', background: filterBranch === 'pawla' ? '#fff7ed' : 'white', fontWeight: filterBranch === 'pawla' ? 600 : 400, cursor: 'pointer', fontFamily: 'Outfit', fontSize: '12px' }}
           >
-            🟠 Rodzina Pawła (Franciszek & Leon)
+            🟠 Gałąź Franciszka & Leona
           </button>
         </Panel>
 
         <Panel position="top-right" style={{ background: 'white', padding: '15px', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'}}>
           <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', fontFamily: 'Outfit' }}>Legenda Gałęzi</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', fontFamily: 'Outfit' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '14px', height: '14px', background: '#fee2e2', border: '2px solid #dc2626', borderRadius: '4px' }}></div> Zyglerowie (Ty i Dzieci)</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '14px', height: '14px', background: '#e0f2fe', border: '2px solid #0284c7', borderRadius: '4px' }}></div> Dominik</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '14px', height: '14px', background: '#f3e8ff', border: '2px solid #9333ea', borderRadius: '4px' }}></div> Siudzińscy</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '14px', height: '14px', background: '#ffedd5', border: '2px solid #ea580c', borderRadius: '4px' }}></div> Franciszek</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '14px', height: '14px', background: '#dcfce7', border: '2px solid #16a34a', borderRadius: '4px' }}></div> Leon</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><div style={{ width: '14px', height: '14px', background: '#fee2e2', border: '2px solid #dc2626', borderRadius: '4px' }}></div> Ty i Najbliżsi</div>
           </div>
         </Panel>
       </ReactFlow>
