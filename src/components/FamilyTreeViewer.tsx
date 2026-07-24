@@ -63,14 +63,17 @@ export default function FamilyTreeViewer() {
     return nodes.map(n => ({ ...n, type: 'person' }));
   }, [nodes]);
 
+  const defaultEdgeOptions = { style: { stroke: '#64748b', strokeWidth: 1.5 }, type: 'step' };
+
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div style={{ width: '100%', height: '100%', background: '#f8fafc' }}>
       <ReactFlow
         nodes={configuredNodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
+        defaultEdgeOptions={defaultEdgeOptions}
         fitView
       >
         <Background />
