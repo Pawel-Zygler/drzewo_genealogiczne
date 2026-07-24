@@ -1,15 +1,15 @@
 import React from 'react';
-import FamilyTreeViewer from './components/FamilyTreeViewer';
+import RelativesTreeViewer from './components/RelativesTreeViewer';
 
 function App() {
   return (
     <div className="app-container">
       <header className="header">
         <h1>Drzewo Genealogiczne</h1>
-        <p>Historia naszej rodziny</p>
+        <p>Historia naszej rodziny (Kliknij na osobę, aby skupić na niej drzewo)</p>
       </header>
       <main className="tree-container">
-        <FamilyTreeViewer />
+        <RelativesTreeViewer />
       </main>
     </div>
   );
