@@ -31,6 +31,9 @@ jobs:
         run: npm install
       - name: Build
         run: npm run build
+        env:
+          # Konfiguracja Firebase (wspólna edycja drzewa). Ustaw w: Settings → Secrets and variables → Actions → Variables.
+          VITE_FIREBASE_CONFIG: ${{ vars.FIREBASE_CONFIG }}
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact

@@ -1,8 +1,11 @@
 const AVATAR = 80;
 
+export const avatarUrl = (p: { label: string; image?: string }) =>
+  p.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.label)}&background=random&color=fff&size=80`;
+
 // The avatar is centred vertically in the node box, because that is where
 // relatives-tree routes spouse and parent/child connectors.
-function PersonNode({ data, height }: { data: any; height: number }) {
+function PersonNode({ data, height, photo }: { data: any; height: number; photo?: string }) {
   const role = data.role || 'Rodzina';
   
   return (
@@ -27,8 +30,8 @@ function PersonNode({ data, height }: { data: any; height: number }) {
         boxSizing: 'border-box',
         borderRadius: '50%',
         backgroundColor: '#e2e8f0',
-        border: data.isRoot ? '3px solid #2563eb' : '3px solid white',
-        boxShadow: data.isRoot ? '0 0 0 3px rgba(37, 99, 235, 0.3)' : '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+        border: data.isRoot || data.isSelected ? '3px solid #2563eb' : '3px solid white',
+        boxShadow: data.isSelected ? '0 0 0 4px rgba(37, 99, 235, 0.45)' : data.isRoot ? '0 0 0 3px rgba(37, 99, 235, 0.3)' : '0 4px 6px -1px rgb(0 0 0 / 0.1)',
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
@@ -38,7 +41,7 @@ function PersonNode({ data, height }: { data: any; height: number }) {
         zIndex: 1
       }}>
         <img 
-          src={data.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.label)}&background=random&color=fff&size=80`} 
+          src={photo || avatarUrl(data)}
           alt={data.label}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
         />

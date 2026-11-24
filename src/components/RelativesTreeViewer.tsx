@@ -1,7 +1,9 @@
-import React, { useState, useMemo, useRef, useLayoutEffect, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useLayoutEffect, useCallback, useEffect } from 'react';
 import calcTree from 'relatives-tree';
-import { nodes as allNodes, ExtNode } from '../data/familyTree';
+import type { Person } from '../data/treeOps';
+import type { Photos, TreeStore } from '../data/store';
 import PersonNode from './PersonNode';
+import PersonPanel from './PersonPanel';
 
 // relatives-tree works on a grid of half-node units: every node takes 2x2 cells
 // and its connectors run through the centre of those cells. Positions and
@@ -17,18 +19,47 @@ const MAX_ROW_WIDTH = 2400;
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 1.5;
 
-export default function RelativesTreeViewer() {
+export default function RelativesTreeViewer({ store }: { store: TreeStore }) {
   const [rootId, setRootId] = useState<string>('all');
   const [zoom, setZoom] = useState<number>(0.9);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const [allNodes, setAllNodes] = useState<Person[] | null>(null);
+  const [photos, setPhotos] = useState<Photos>({});
+  // undefined = panel closed, null = adding a new unconnected person
+  const [selectedId, setSelectedId] = useState<string | null | undefined>(undefined);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const offNodes = store.subscribe(setAllNodes, e => {
+      console.error(e);
+      setError('Nie udało się połączyć z bazą danych drzewa.');
+    });
+    const offPhotos = store.subscribePhotos(setPhotos);
+    return () => {
+      offNodes();
+      offPhotos();
+    };
+  }, [store]);
+
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(null), 6000);
+    return () => clearTimeout(t);
+  }, [error]);
+
   const nodeDataMap = useMemo(() => {
-    const map = new Map<string, ExtNode>();
-    allNodes.forEach(n => map.set(n.id, n));
+    const map = new Map<string, Person>();
+    (allNodes || []).forEach(n => map.set(n.id, n));
     return map;
-  }, []);
+  }, [allNodes]);
+
+  // The focused person may have been removed (possibly by another editor).
+  const activeRoot = rootId === 'all' || nodeDataMap.has(rootId) ? rootId : 'all';
 
   const treeData = useMemo(() => {
+    const rootId = activeRoot;
+    if (!allNodes || allNodes.length === 0) return { clusters: [], width: 0, height: 0 };
     if (rootId !== 'all') {
       try {
         const res = calcTree(allNodes, { rootId });
@@ -99,21 +130,27 @@ export default function RelativesTreeViewer() {
       width: maxWidth + CANVAS_PADDING,
       height: cursorY + rowHeight + CANVAS_PADDING,
     };
-  }, [rootId]);
+  }, [activeRoot, allNodes]);
 
   // Scale the tree so its full width fits the visible area (never enlarging past 100%).
+  const widthRef = useRef(0);
+  widthRef.current = treeData.width;
   const fitToScreen = useCallback(() => {
     const el = scrollRef.current;
-    if (!el) return;
+    if (!el || !widthRef.current) return;
     const available = el.clientWidth - 16;
-    const fit = Math.min(1, available / treeData.width);
+    const fit = Math.min(1, available / widthRef.current);
     setZoom(Math.max(MIN_ZOOM, Math.round(fit * 100) / 100));
     el.scrollTo({ left: 0, top: 0 });
-  }, [treeData.width]);
+  }, []);
 
-  // Re-fit whenever the selected view changes, and when the window is resized.
+  // Re-fit when the selected view changes, once the data arrives and on resize,
+  // but not after every edit, so the view doesn't jump while someone is editing.
+  const loaded = allNodes !== null;
   useLayoutEffect(() => {
     fitToScreen();
+  }, [fitToScreen, activeRoot, loaded]);
+  useEffect(() => {
     window.addEventListener('resize', fitToScreen);
     return () => window.removeEventListener('resize', fitToScreen);
   }, [fitToScreen]);
@@ -123,7 +160,7 @@ export default function RelativesTreeViewer() {
     { id: 'pawel', label: '❤️ Paweł (Ty & Dzieci)', color: '#dc2626', bg: '#fee2e2' },
     { id: 'gosia', label: '🟣 Gosia & Rodzina', color: '#9333ea', bg: '#faf5ff' },
     { id: 'franciszek', label: '🟠 Dziadek Franek', color: '#ea580c', bg: '#ffedd5' },
-  ];
+  ].filter(v => v.id === 'all' || nodeDataMap.has(v.id));
 
   const zoomBtn: React.CSSProperties = {
     padding: '4px 10px',
@@ -135,7 +172,7 @@ export default function RelativesTreeViewer() {
   };
 
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: '#f8fafc' }}>
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', background: '#f8fafc', position: 'relative' }}>
 
       {/* Toolbar: sits above the scroll area so it never covers the tree and wraps on narrow screens */}
       <div style={{
@@ -152,7 +189,7 @@ export default function RelativesTreeViewer() {
       }}>
         <span style={{ fontWeight: 600 }}>Centrum widoku:</span>
         {views.map(v => {
-          const active = rootId === v.id;
+          const active = activeRoot === v.id;
           return (
             <button
               key={v.id}
@@ -172,6 +209,21 @@ export default function RelativesTreeViewer() {
             </button>
           );
         })}
+
+        <button
+          onClick={() => setSelectedId(null)}
+          style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #16a34a', background: '#f0fdf4', color: '#166534', fontWeight: 600, fontFamily: 'inherit', whiteSpace: 'nowrap', cursor: 'pointer' }}
+        >
+          + Dodaj osobę
+        </button>
+        <span
+          className={`store-badge ${store.mode}`}
+          title={store.mode === 'shared'
+            ? 'Zmiany zapisują się we wspólnej bazie i od razu widzi je każdy, kto ma link.'
+            : 'Brak konfiguracji bazy danych: zmiany zapisują się tylko w tej przeglądarce.'}
+        >
+          {store.mode === 'shared' ? '● Wspólne drzewo' : '● Tryb lokalny'}
+        </span>
 
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '5px', alignItems: 'center' }}>
           <button onClick={() => setZoom(z => Math.max(MIN_ZOOM, Math.round((z - 0.1) * 100) / 100))} style={zoomBtn} aria-label="Pomniejsz">−</button>
@@ -225,12 +277,13 @@ export default function RelativesTreeViewer() {
                     const customData = nodeDataMap.get(node.id);
                     if (!customData) return null;
 
-                    const isRoot = node.id === rootId;
+                    const isRoot = node.id === activeRoot;
 
                     return (
                       <div
                         key={node.id}
-                        onClick={() => setRootId(node.id)}
+                        className="tree-node"
+                        onClick={() => setSelectedId(node.id)}
                         style={{
                           position: 'absolute',
                           left: `${node.left * HALF_W}px`,
@@ -240,9 +293,9 @@ export default function RelativesTreeViewer() {
                           zIndex: 2,
                           cursor: 'pointer',
                         }}
-                        title="Kliknij, aby ustawić tę osobę jako centrum widoku"
+                        title="Kliknij, aby zobaczyć, edytować lub dodać krewnych"
                       >
-                        <PersonNode data={{ ...customData, isRoot }} height={NODE_HEIGHT} />
+                        <PersonNode data={{ ...customData, isRoot, isSelected: node.id === selectedId }} height={NODE_HEIGHT} photo={photos[node.id]} />
                       </div>
                     );
                   })}
@@ -252,6 +305,20 @@ export default function RelativesTreeViewer() {
           </div>
         </div>
       </div>
+      {allNodes === null && !error && <div className="tree-loading">Wczytywanie drzewa…</div>}
+      {error && <div className="tree-toast" role="alert" onClick={() => setError(null)}>{error}</div>}
+
+      {selectedId !== undefined && allNodes && (
+        <PersonPanel
+          personId={selectedId}
+          nodes={allNodes}
+          photos={photos}
+          store={store}
+          onSelect={id => setSelectedId(id === null ? undefined : id)}
+          onFocus={id => setRootId(id)}
+          onError={setError}
+        />
+      )}
     </div>
   );
 }
