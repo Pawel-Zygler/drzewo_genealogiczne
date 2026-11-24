@@ -1,6 +1,8 @@
-import React from 'react';
+const AVATAR = 80;
 
-function PersonNode({ data }: { data: any }) {
+// The avatar is centred vertically in the node box, because that is where
+// relatives-tree routes spouse and parent/child connectors.
+function PersonNode({ data, height }: { data: any; height: number }) {
   const role = data.role || 'Rodzina';
   
   return (
@@ -9,7 +11,9 @@ function PersonNode({ data }: { data: any }) {
       flexDirection: 'column',
       alignItems: 'center',
       fontFamily: 'Outfit, sans-serif',
-      width: '120px',
+      width: '100%',
+      boxSizing: 'border-box',
+      padding: `${height / 2 - AVATAR / 2}px 8px 0`,
       background: 'transparent',
       opacity: data.deceased ? 0.7 : 1,
       filter: data.deceased ? 'grayscale(100%)' : 'none',
@@ -17,8 +21,10 @@ function PersonNode({ data }: { data: any }) {
       
       {/* Avatar Circle */}
       <div style={{
-        width: '80px',
-        height: '80px',
+        width: `${AVATAR}px`,
+        height: `${AVATAR}px`,
+        flexShrink: 0,
+        boxSizing: 'border-box',
         borderRadius: '50%',
         backgroundColor: '#e2e8f0',
         border: data.isRoot ? '3px solid #2563eb' : '3px solid white',
@@ -27,8 +33,9 @@ function PersonNode({ data }: { data: any }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: '10px',
-        zIndex: 10
+        marginBottom: '8px',
+        position: 'relative',
+        zIndex: 1
       }}>
         <img 
           src={data.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.label)}&background=random&color=fff&size=80`} 
@@ -44,15 +51,21 @@ function PersonNode({ data }: { data: any }) {
         fontSize: '11px', 
         textTransform: 'uppercase', 
         textAlign: 'center',
-        lineHeight: '1.2'
+        lineHeight: '1.2',
+        maxWidth: '100%',
+        overflowWrap: 'anywhere',
+        background: '#f8fafc',
+        padding: '0 2px',
       }}>
         {data.label}
       </div>
       <div style={{
         fontSize: '10px',
         color: '#6b7280',
-        marginTop: '4px',
-        textAlign: 'center'
+        marginTop: '2px',
+        textAlign: 'center',
+        background: '#f8fafc',
+        padding: '0 2px',
       }}>
         {role}
       </div>
