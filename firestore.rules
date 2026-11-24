@@ -1,0 +1,30 @@
+rules_version = '2';
+
+// Reguły dla wspólnego drzewa: każdy, kto ma link do strony, może czytać i edytować.
+// Wklej je w Firebase Console → Firestore Database → Reguły → Opublikuj.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /trees/main {
+      allow read: if true;
+      allow create, update: if request.resource.data.keys().hasOnly(['nodes', 'updatedAt'])
+                            && request.resource.data.nodes is list
+                            && request.resource.data.nodes.size() < 3000;
+      allow delete: if false;
+
+      // Poprzednie wersje drzewa (do przywrócenia z konsoli Firebase). Tylko dopisywanie.
+      match /history/{entry} {
+        allow create: if request.resource.data.nodes is list;
+        allow read, update, delete: if false;
+      }
+
+      // Zdjęcia osób (zmniejszone do 240×240 px, zapisane jako data URL).
+      match /photos/{personId} {
+        allow read: if true;
+        allow create, update: if request.resource.data.data is string
+                              && request.resource.data.data.size() < 300000
+                              && request.resource.data.data.matches('^data:image/(jpeg|png|webp);base64,.*');
+        allow delete: if true;
+      }
+    }
+  }
+}
