@@ -9,6 +9,8 @@ export type Photos = Record<string, string>;
 
 export interface TreeStore {
   mode: 'shared' | 'local';
+  /** The viewer may look but not change anything. */
+  readOnly?: boolean;
   subscribe(onNodes: (nodes: Person[]) => void, onError: (e: unknown) => void): () => void;
   subscribePhotos(onPhotos: (photos: Photos) => void): () => void;
   /** Apply a change to the latest version of the tree (safe with concurrent editors). */
@@ -38,7 +40,15 @@ export function readFirebaseConfig(): Record<string, string> | null {
   }
 }
 
+export class NoAccessError extends Error {}
+
 export async function createStore(): Promise<TreeStore> {
+  if (import.meta.env.MODE === 'artifact') {
+    const { createArtifactStore } = await import('./artifactStore');
+    const store = await createArtifactStore();
+    if (!store) throw new NoAccessError('shared storage unavailable');
+    return store;
+  }
   const cfg = readFirebaseConfig();
   if (cfg) {
     const { createFirebaseStore } = await import('./firebaseStore');

@@ -1,7 +1,18 @@
 const AVATAR = 80;
 
-export const avatarUrl = (p: { label: string; image?: string }) =>
-  p.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.label)}&background=random&color=fff&size=80`;
+const AVATAR_COLORS = ['#2563eb', '#7c3aed', '#db2777', '#ea580c', '#0d9488', '#4d7c0f', '#0369a1', '#9333ea', '#b45309', '#be123c'];
+
+/** Initials on a coloured circle, drawn locally (no external image service, works offline and inside artifacts). */
+export const avatarUrl = (p: { label: string; image?: string }) => {
+  if (p.image) return p.image;
+  const words = p.label.replace(/\(.*?\)/g, ' ').split(/\s+/).filter(w => /\p{L}/u.test(w));
+  const initials = (words.length > 1 ? words[0][0] + words[words.length - 1][0] : (words[0] || '?').slice(0, 2)).toUpperCase();
+  let h = 0;
+  for (const ch of p.label) h = (h * 31 + ch.codePointAt(0)!) >>> 0;
+  const bg = AVATAR_COLORS[h % AVATAR_COLORS.length];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><rect width="80" height="80" fill="${bg}"/><text x="40" y="41" dominant-baseline="middle" text-anchor="middle" font-family="Outfit, Arial, sans-serif" font-size="30" font-weight="600" fill="#fff">${initials.replace(/[<>&"]/g, '')}</text></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+};
 
 // The avatar is centred vertically in the node box, because that is where
 // relatives-tree routes spouse and parent/child connectors.

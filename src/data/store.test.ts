@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { readFirebaseConfig } from './store';
 
 describe('readFirebaseConfig', () => {
-  afterEach(() => vi.unstubAllEnvs());
+  afterEach(() => { vi.unstubAllEnvs(); });
 
   it('accepts the JS object copied from the Firebase console', () => {
     vi.stubEnv('VITE_FIREBASE_CONFIG', `const firebaseConfig = {

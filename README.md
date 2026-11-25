@@ -35,3 +35,13 @@ Przy pierwszym otwarciu strony baza zostanie wypełniona danymi z `src/data/fami
 Te klucze Firebase nie są tajne (trafiają do przeglądarki każdego odwiedzającego); dostęp kontrolują reguły z `firestore.rules`. Każda zmiana zapisuje poprzednią wersję drzewa w kolekcji `trees/main/history`, więc przypadkowe lub złośliwe zmiany można cofnąć z konsoli Firebase.
 
 Lokalnie: utwórz plik `.env.local` z linią `VITE_FIREBASE_CONFIG={"apiKey":"...","projectId":"...",...}` i uruchom `npm run dev`.
+
+## Wersja jako artefakt Claude
+
+To samo drzewo można opublikować jako artefakt Claude (strona na claude.ai z własną wspólną bazą danych, bez Firebase):
+
+```
+npm run build:artifact   # tworzy artifact/drzewo.html
+```
+
+W tym trybie dane są w bazie artefaktu (`people/{id}`, `photos/{id}`, `history/*`). Edytować mogą osoby, którym udostępniono artefakt z uprawnieniem do edycji (każdy musi mieć konto Claude). Strona sama nie wypełnia pustej bazy: dane startowe wgrywa Claude.
