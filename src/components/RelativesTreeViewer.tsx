@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useLayoutEffect, useCallback, useEffe
 import calcTree from 'relatives-tree';
 import type { Person } from '../data/treeOps';
 import type { Photos, TreeStore } from '../data/store';
+import { layoutAll } from '../data/layout';
 import PersonNode from './PersonNode';
 import PersonPanel from './PersonPanel';
 
@@ -73,31 +74,10 @@ export default function RelativesTreeViewer({ store }: { store: TreeStore }) {
       }
     }
 
-    // Default 'all' mode: show every family member using as few trees as possible.
-    // Each person-centred tree is computed once, then trees are picked greedily by how
-    // many not-yet-shown people they add. This keeps e.g. Paweł's small family from
-    // being drawn on its own and then again inside the Siudziński tree.
-    const candidates: { id: string; res: any }[] = [];
-    allNodes.forEach(n => {
-      try {
-        candidates.push({ id: n.id, res: calcTree(allNodes, { rootId: n.id }) });
-      } catch (e) {
-        console.error('Error cluster:', n.id, e);
-      }
-    });
-
-    const visited = new Set<string>();
-    const picked: any[] = [];
-    while (visited.size < allNodes.length) {
-      let best: { res: any; gain: number } | null = null;
-      for (const c of candidates) {
-        const gain = c.res.nodes.filter((rn: any) => !visited.has(rn.id)).length;
-        if (gain > 0 && (!best || gain > best.gain)) best = { res: c.res, gain };
-      }
-      if (!best) break;
-      best.res.nodes.forEach((rn: any) => visited.add(rn.id));
-      picked.push(best.res);
-    }
+    // Default 'all' mode: one layout in which every person appears exactly once.
+    // (Covering the family with person-centred relatives-tree layouts drew whole
+    // branches twice, e.g. when an in-law's parent was added.)
+    const picked: any[] = layoutAll(allNodes);
 
     const clusters: { res: any; offsetX: number; offsetY: number }[] = [];
 
