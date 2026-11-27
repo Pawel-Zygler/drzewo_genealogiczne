@@ -69,7 +69,7 @@ export default function PedigreeChart({ store }: { store: TreeStore }) {
           ))}
         </span>
       </span>
-      <button className="alt-add" onClick={() => setSelectedId(null)}>+ Dodaj osobę</button>
+      {!store.readOnly && <button className="alt-add" onClick={() => setSelectedId(null)}>+ Dodaj osobę</button>}
       <StoreBadge store={store} />
     </>
   );
@@ -103,7 +103,7 @@ export default function PedigreeChart({ store }: { store: TreeStore }) {
         >
           <span className="ped-no">{n}</span>
           <span className="ped-empty-label">{n % 2 === 0 ? 'Ojciec' : 'Matka'} nieznan{n % 2 === 0 ? 'y' : 'a'}</span>
-          <span className="ped-empty-hint">+ dodaj</span>
+          {!store.readOnly && <span className="ped-empty-hint">+ dodaj</span>}
         </button>
       );
     }

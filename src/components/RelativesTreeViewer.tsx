@@ -190,19 +190,19 @@ export default function RelativesTreeViewer({ store }: { store: TreeStore }) {
           );
         })}
 
-        <button
+        {!store.readOnly && <button
           onClick={() => setSelectedId(null)}
           style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #16a34a', background: '#f0fdf4', color: '#166534', fontWeight: 600, fontFamily: 'inherit', whiteSpace: 'nowrap', cursor: 'pointer' }}
         >
           + Dodaj osobę
-        </button>
+        </button>}
         <span
           className={`store-badge ${store.mode}`}
           title={store.mode === 'shared'
             ? 'Zmiany zapisują się we wspólnej bazie i od razu widzi je każdy, kto ma link.'
             : 'Brak konfiguracji bazy danych: zmiany zapisują się tylko w tej przeglądarce.'}
         >
-          {store.mode === 'shared' ? '● Wspólne drzewo' : '● Tryb lokalny'}
+          {store.readOnly ? '● Tylko podgląd' : store.mode === 'shared' ? '● Wspólne drzewo' : '● Tryb lokalny'}
         </span>
 
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '5px', alignItems: 'center' }}>
@@ -286,6 +286,19 @@ export default function RelativesTreeViewer({ store }: { store: TreeStore }) {
         </div>
       </div>
       {allNodes === null && !error && <div className="tree-loading">Wczytywanie drzewa…</div>}
+      {allNodes !== null && allNodes.length === 0 && selectedId === undefined && (
+        <div className="tree-empty">
+          <h2>Drzewo jest jeszcze puste</h2>
+          {store.readOnly ? (
+            <p>Gdy ktoś doda pierwsze osoby, pojawią się tutaj.</p>
+          ) : (
+            <>
+              <p>Zacznij od siebie, a potem dodawaj rodziców, dzieci i rodzeństwo, klikając na portret.</p>
+              <button onClick={() => setSelectedId(null)}>+ Dodaj pierwszą osobę</button>
+            </>
+          )}
+        </div>
+      )}
       {error && <div className="tree-toast" role="alert" onClick={() => setError(null)}>{error}</div>}
 
       {selectedId !== undefined && allNodes && (

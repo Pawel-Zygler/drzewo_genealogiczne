@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import RelativesTreeViewer from './components/RelativesTreeViewer';
 import ChalkboardTree from './components/ChalkboardTree';
 import PedigreeChart from './components/PedigreeChart';
-import { createLocalStore, createStore, type TreeStore } from './data/store';
+import { createLocalStore, createStore, NoAccessError, type TreeStore } from './data/store';
 
 const VERSIONS = [
   { id: '1', label: 'Klasyczne', title: 'Wersja 1: całe drzewo z portretami' },
@@ -25,12 +25,14 @@ function initialVersion(): Version {
 
 function App() {
   const [store, setStore] = useState<TreeStore | null>(null);
+  const [noAccess, setNoAccess] = useState(false);
   const [version, setVersion] = useState<Version>(initialVersion);
 
   useEffect(() => {
     createStore()
       .then(setStore)
       .catch(e => {
+        if (e instanceof NoAccessError) return setNoAccess(true);
         console.error('Shared storage unavailable, using local mode', e);
         setStore(createLocalStore());
       });
@@ -69,7 +71,14 @@ function App() {
       </header>
       <main className="tree-container">
         {!store ? (
-          <div className="tree-loading">Wczytywanie…</div>
+          noAccess ? (
+            <div className="tree-empty">
+              <h2>Brak dostępu do wspólnego drzewa</h2>
+              <p>Zaloguj się do Claude kontem, któremu udostępniono to drzewo, i odśwież stronę.</p>
+            </div>
+          ) : (
+            <div className="tree-loading">Wczytywanie…</div>
+          )
         ) : version === '2' ? (
           <ChalkboardTree store={store} />
         ) : version === '3' ? (

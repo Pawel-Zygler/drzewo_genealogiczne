@@ -41,6 +41,7 @@ const GROUPS: { key: 'parents' | 'spouses' | 'siblings' | 'children'; title: str
 
 export default function PersonPanel({ personId, nodes, photos, store, onSelect, onFocus, onError }: Props) {
   const person = personId ? nodes.find(n => n.id === personId) || null : null;
+  const readOnly = !!store.readOnly;
   const [mode, setMode] = useState<'view' | 'edit' | { add: RelKind }>(personId ? 'view' : 'edit');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -68,7 +69,7 @@ export default function PersonPanel({ personId, nodes, photos, store, onSelect, 
       await fn();
     } catch (e: any) {
       console.error(e);
-      onError(e?.code === 'permission-denied' ? 'Brak uprawnień do zapisu (sprawdź reguły Firestore).' : 'Nie udało się zapisać zmian. Spróbuj ponownie.');
+      onError(e?.code === 'permission-denied' || e?.code === 'invalid_argument' ? 'Nie masz uprawnień do edycji tego drzewa.' : 'Nie udało się zapisać zmian. Spróbuj ponownie.');
     } finally {
       setBusy(false);
     }
@@ -93,11 +94,11 @@ export default function PersonPanel({ personId, nodes, photos, store, onSelect, 
           <button
             className="panel-avatar"
             onClick={() => fileRef.current?.click()}
-            title="Kliknij, aby zmienić zdjęcie"
-            disabled={busy}
+            title={readOnly ? person.label : 'Kliknij, aby zmienić zdjęcie'}
+            disabled={busy || readOnly}
           >
             <img src={photos[person.id] || avatarUrl(person)} alt={person.label} />
-            <span>Zmień zdjęcie</span>
+            {!readOnly && <span>Zmień zdjęcie</span>}
           </button>
           <input ref={fileRef} type="file" accept="image/*" hidden onChange={e => { onPhoto(e.target.files?.[0]); e.target.value = ''; }} />
           <div>
@@ -106,7 +107,7 @@ export default function PersonPanel({ personId, nodes, photos, store, onSelect, 
             {(person.born || person.died) && (
               <div className="muted">{[person.born && `ur. ${person.born}`, person.died && `zm. ${person.died}`].filter(Boolean).join(' · ')}</div>
             )}
-            {photos[person.id] && (
+            {photos[person.id] && !readOnly && (
               <button className="link-btn" onClick={() => run(() => store.setPhoto(person.id, null))}>Usuń zdjęcie</button>
             )}
           </div>
@@ -165,19 +166,19 @@ export default function PersonPanel({ personId, nodes, photos, store, onSelect, 
       {person && mode === 'view' && (
         <>
           <div className="panel-actions">
-            <button onClick={() => setMode('edit')}>✏️ Edytuj dane</button>
+            {!readOnly && <button onClick={() => setMode('edit')}>✏️ Edytuj dane</button>}
             <button onClick={() => onFocus(person.id)}>🎯 Pokaż drzewo tej osoby</button>
           </div>
 
           {person.notes && <p className="notes">{person.notes}</p>}
 
-          <h3>Dodaj</h3>
-          <div className="panel-actions">
+          {!readOnly && <h3>Dodaj</h3>}
+          {!readOnly && <div className="panel-actions">
             <button onClick={() => setMode({ add: 'parent' })} disabled={person.parents.length >= MAX_PARENTS}>+ Rodzica</button>
             <button onClick={() => setMode({ add: 'spouse' })}>+ Małżonka</button>
             <button onClick={() => setMode({ add: 'child' })}>+ Dziecko</button>
             <button onClick={() => setMode({ add: 'sibling' })}>+ Rodzeństwo</button>
-          </div>
+          </div>}
 
           {GROUPS.map(g => {
             const list = person[g.key];
@@ -195,14 +196,14 @@ export default function PersonPanel({ personId, nodes, photos, store, onSelect, 
                           <img src={photos[other.id] || avatarUrl(other)} alt="" />
                           <span>{other.label}</span>
                         </button>
-                        <button
+                        {!readOnly && <button
                           className="rel-remove"
                           title="Usuń to powiązanie (osoba zostaje w drzewie)"
                           disabled={busy}
                           onClick={() => run(() => store.update(ns => removeRelation(ns, person.id, other.id)))}
                         >
                           Odłącz
-                        </button>
+                        </button>}
                       </li>
                     );
                   })}
@@ -211,7 +212,7 @@ export default function PersonPanel({ personId, nodes, photos, store, onSelect, 
             );
           })}
 
-          <div className="panel-danger">
+          {!readOnly && <div className="panel-danger">
             {confirmDelete ? (
               <>
                 <span>Usunąć {person.label} z drzewa?</span>
@@ -233,7 +234,7 @@ export default function PersonPanel({ personId, nodes, photos, store, onSelect, 
             ) : (
               <button className="link-btn danger-text" onClick={() => setConfirmDelete(true)}>Usuń osobę z drzewa</button>
             )}
-          </div>
+          </div>}
         </>
       )}
     </aside>

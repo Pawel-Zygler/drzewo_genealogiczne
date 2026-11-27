@@ -37,7 +37,7 @@ export default function ChalkboardTree({ store }: { store: TreeStore }) {
           ))}
         </select>
       </label>
-      <button className="alt-add" onClick={() => setSelectedId(null)}>+ Dodaj osobę</button>
+      {!store.readOnly && <button className="alt-add" onClick={() => setSelectedId(null)}>+ Dodaj osobę</button>}
       <StoreBadge store={store} />
     </>
   );
