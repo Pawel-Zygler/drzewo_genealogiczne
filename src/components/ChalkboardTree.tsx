@@ -12,11 +12,13 @@ const HEART = 'M0 4 C-2 -1 -9 -1 -9 4.5 C-9 9 -3 12 0 15 C3 12 9 9 9 4.5 C9 -1 2
 /** Version 2: descendant chart on a chalkboard, couples joined by a heart. */
 export default function ChalkboardTree({ store }: { store: TreeStore }) {
   const { nodes, byId, photos, error, setError } = useTree(store);
-  const [rootId, setRootId] = useState('all');
+  // On a phone all families side by side are too small to read, so start with the biggest one.
+  const [rootId, setRootId] = useState(() => (window.innerWidth < 640 ? 'auto' : 'all'));
   const [selectedId, setSelectedId] = useState<string | null | undefined>(undefined);
 
   const familyList = useMemo(() => (nodes ? founders(nodes) : []), [nodes]);
-  const activeRoot = rootId === 'all' || byId.has(rootId) ? rootId : 'all';
+  const activeRoot =
+    rootId === 'all' || byId.has(rootId) ? rootId : rootId === 'auto' && familyList.length ? familyList[0].id : 'all';
   const layout = useMemo(() => layoutDescendants(nodes || [], activeRoot), [nodes, activeRoot]);
 
   const options = [
@@ -62,15 +64,10 @@ export default function ChalkboardTree({ store }: { store: TreeStore }) {
 
   const A = D.AVATAR;
   return (
-    <ZoomCanvas width={layout.width} height={layout.height} fitKey={`${activeRoot}-${nodes ? 1 : 0}`} focusX={layout.nodes[0]?.x} className="chalk" toolbar={toolbar} overlay={overlay}>
+    <ZoomCanvas width={layout.width} height={layout.height} fitKey={`${activeRoot}-${nodes ? 1 : 0}`} focusX={layout.nodes[0]?.x} minFitPhone={0.62} className="chalk" toolbar={toolbar} overlay={overlay}>
       <svg width={layout.width} height={layout.height} className="chalk-lines">
-        <defs>
-          <filter id="chalk-rough">
-            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n" />
-            <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" />
-          </filter>
-        </defs>
-        <g filter="url(#chalk-rough)" fill="none" stroke="rgba(244,241,232,0.78)" strokeWidth="2" strokeLinecap="round">
+        {/* Plain strokes: an SVG filter over the whole (very large) drawing made phones, Safari especially, slow or drop the lines. */}
+        <g fill="none" stroke="rgba(244,241,232,0.8)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
           {layout.lines.map((d, i) => <path key={i} d={d} />)}
         </g>
         {layout.hearts.map((h, i) => (

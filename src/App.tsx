@@ -43,9 +43,12 @@ function App() {
     try {
       localStorage.setItem(LS_VERSION, v);
     } catch {}
-    const url = new URL(window.location.href);
-    url.searchParams.set('widok', v);
-    window.history.replaceState(null, '', url);
+    try {
+      // Not allowed everywhere (e.g. inside the Claude artifact frame); the choice still works without it.
+      const url = new URL(window.location.href);
+      url.searchParams.set('widok', v);
+      window.history.replaceState(null, '', url);
+    } catch {}
   };
 
   return (
